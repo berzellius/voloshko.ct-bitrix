@@ -1,6 +1,8 @@
 package com.voloshko.ctbitrix.config;
 
 
+import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
+import com.voloshko.ctbitrix.dto.api.ErrorHandlers.BitrixAPIRequestErrorHandler;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.CalltrackingAPIRequestErrorHandler;
 import com.voloshko.ctbitrix.interceptors.AddTemplatesDataInterceptor;
 import com.voloshko.ctbitrix.service.*;
@@ -93,12 +95,12 @@ public class ServiceBeanConfiguration {
         callTrackingAPIService.setLoginURL("https://calltracking.ru/api/login.php");
         callTrackingAPIService.setLoginMethod(HttpMethod.POST);
 
-        callTrackingAPIService.setLogin("info@home-motion.ru");
-        callTrackingAPIService.setPassword("");
-        callTrackingAPIService.setWebSiteLogin("info@home-motion.ru");
-        callTrackingAPIService.setWebSitePassword("");
+        callTrackingAPIService.setLogin("voloshko@e-vrika.ru");
+        callTrackingAPIService.setPassword("vGBiUJ3uqhrVu");
+        callTrackingAPIService.setWebSiteLogin("voloshko@e-vrika.ru");
+        callTrackingAPIService.setWebSitePassword("vGBiUJ3uqhrVu");
         callTrackingAPIService.setWebSiteLoginUrl("https://calltracking.ru/admin/login");
-        Integer[] projects = {};
+        Integer[] projects = {4201};
         callTrackingAPIService.setProjects(projects);
 
         CalltrackingAPIRequestErrorHandler errorHandler = new CalltrackingAPIRequestErrorHandler();
@@ -121,5 +123,29 @@ public class ServiceBeanConfiguration {
         return new CallTrackingSourceConditionServiceImpl();
     }
 
+    @Bean
+    public BitrixAPIService bitrixAPIService(){
+        BitrixAPIService bitrixAPIService = new BitrixAPIServiceImpl();
+        bitrixAPIService.setInitialRefreshToken("n08ovaent0h7buwsf62a5au2as6c5ss6");
+        bitrixAPIService.setClientId("local.56df37285e4da7.92471890");
+        bitrixAPIService.setClientSecret("6229e40ca74d812e4a8ada6ff19135ca");
+        bitrixAPIService.setDefaultScope("crm");
+        bitrixAPIService.setRefreshGrantType("refresh_token");
+        bitrixAPIService.setRedirectURI("http://localhost:8080/");
+
+        bitrixAPIService.setLoginUrl("https://evrika-klin.bitrix24.ru/oauth/token/");
+        bitrixAPIService.setLoginMethod(HttpMethod.GET);
+
+        BitrixAPIRequestErrorHandler bitrixAPIRequestErrorHandler = new BitrixAPIRequestErrorHandler();
+        bitrixAPIService.setErrorHandler(bitrixAPIRequestErrorHandler);
+
+        return bitrixAPIService;
+    }
+
+    @Bean
+    public BitrixRefreshAccessService bitrixRefreshAccessService(){
+        BitrixRefreshAccessService bitrixRefreshAccessService = new BitrixRefreshAccessServiceImpl();
+        return bitrixRefreshAccessService;
+    }
 
 }

@@ -52,7 +52,7 @@ public class JPAConfiguration {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[] { "com.callsintegration.dmodel"});
+        em.setPackagesToScan(new String[] { "com.voloshko.ctbitrix"});
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);

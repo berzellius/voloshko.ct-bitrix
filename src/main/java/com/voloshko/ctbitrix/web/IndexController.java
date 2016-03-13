@@ -1,6 +1,9 @@
 package com.voloshko.ctbitrix.web;
 
+import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIRequest;
+import com.voloshko.ctbitrix.exception.APIAuthException;
 import com.voloshko.ctbitrix.repository.CallRepository;
+import com.voloshko.ctbitrix.service.BitrixAPIService;
 import com.voloshko.ctbitrix.service.CallTrackingAPIService;
 import com.voloshko.ctbitrix.service.CallTrackingSourceConditionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +29,24 @@ public class IndexController extends BaseController {
     @Autowired
     CallTrackingSourceConditionService callTrackingSourceConditionService;
 
+    @Autowired
+    BitrixAPIService bitrixAPIService;
+
     @RequestMapping
     public String indexPage(
-            Model model,
-            String code,
-            String domain
+            Model model
+            //,String code,
+            //String domain
     ) throws ParseException {
-            model.addAttribute("code", code);
-            model.addAttribute("domain", domain);
+            //model.addAttribute("code", code);
+            //model.addAttribute("domain", domain);
+
+        try {
+            bitrixAPIService.logIn();
+        } catch (APIAuthException e) {
+            System.out.println("login error");
+            e.printStackTrace();
+        }
 
         return "index";
     }

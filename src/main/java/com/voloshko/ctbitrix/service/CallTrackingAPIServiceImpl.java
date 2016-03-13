@@ -5,17 +5,14 @@ import com.voloshko.ctbitrix.dmodel.CallTrackingSourceCondition;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
 import com.voloshko.ctbitrix.dto.api.calltracking.*;
 import com.voloshko.ctbitrix.exception.APIAuthException;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -28,11 +25,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import org.apache.http.HttpClientConnection.*;
-
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +38,7 @@ import java.util.List;
  * Created by berz on 22.09.2015.
  */
 @Service
-public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
+public class CallTrackingAPIServiceImpl extends APIServiceRequestsImpl implements CallTrackingAPIService {
 
     @Autowired
     CallsService callsService;
@@ -67,8 +61,7 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
     private String apiURL;
     private HttpMethod apiMethod;
 
-    private int reLogins = 0;
-    private int reLoginsMax = 3;
+
 
     private String metrics = "ct:duration,ct:answer_time";
     private String dimensions = "ct:caller,ct:datetime,ct:source,ct:status";
@@ -116,7 +109,7 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
         this.projects = projects;
     }
 
-    private RestTemplate getCallTrackingWebsiteRestTemplate(){
+    public RestTemplate getRestTemplate(){
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(this.errorHandler);
 
@@ -141,35 +134,12 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
         return restTemplate;
     }
 
-    private RestTemplate getCallTrackingRestTemplate(){
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setErrorHandler(this.errorHandler);
-
-        MappingJackson2HttpMessageConverter jsonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        FormHttpMessageConverter httpMessageConverter = new FormHttpMessageConverter();
-
-        List<MediaType> mediaTypes = new ArrayList<MediaType>();
-        mediaTypes.add(MediaType.TEXT_HTML);
-
-        List<MediaType> formsMediaTypes = new ArrayList<MediaType>();
-        formsMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
-
-        List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-
-        jsonHttpMessageConverter.setSupportedMediaTypes(mediaTypes);
-        httpMessageConverter.setSupportedMediaTypes(formsMediaTypes);
-
-        messageConverters.add(jsonHttpMessageConverter);
-        messageConverters.add(httpMessageConverter);
-        restTemplate.setMessageConverters(messageConverters);
-
-        return restTemplate;
-    }
-
-    private void logIn() throws APIAuthException {
+    @Override
+    public void logIn() throws APIAuthException {
 
         HttpEntity<MultiValueMap<String, String>> request = this
                 .requestByParams(this.createLoginParams());
+
 
         CallTrackingAuth callTrackingAuth = (CallTrackingAuth) this
                 .request(
@@ -185,6 +155,7 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
         }
 
         this.auth = callTrackingAuth.getData();
+
         this.reLogins = 0;
     }
 
@@ -324,33 +295,6 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
         }
     }
 
-    private <T> T request(String url, HttpMethod method, HttpEntity<MultiValueMap<String, String>> request, Class<T> cl) throws APIAuthException {
-        return request(url, method, request, cl, APIRequestErrorException.class);
-    }
-
-    private <T, TE> T request(String url, HttpMethod method, HttpEntity<MultiValueMap<String, String>> request, Class<T> cl, Class<TE> exceptionType) throws APIAuthException {
-        return request(url, method, request, this.getCallTrackingRestTemplate(), cl, exceptionType);
-    }
-
-    private <T, TE> T request(String url, HttpMethod method, HttpEntity<MultiValueMap<String, String>> request, RestTemplate rt, Class<T> cl, Class<TE> exceptionType) throws APIAuthException {
-
-        try {
-            HttpEntity<T> response = this.getCallTrackingRestTemplate().exchange(
-                    url, method, request, cl
-            );
-
-            return (T) response.getBody();
-        }
-        catch (Exception e){
-            if(exceptionType.isInstance(e)) {
-                System.out.println("request to calltracking failed with error: " + e.toString());
-                return null;
-            }
-            else{
-                throw e;
-            }
-        }
-    }
 
     private MultiValueMap<String, String> apiParams(Date from, Date to, Long startIndex, Integer maxResults){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -414,13 +358,7 @@ public class CallTrackingAPIServiceImpl implements CallTrackingAPIService {
                 );
 
         if(callTrackingData.getError_code().equals(4)){
-            if(this.reLogins >= this.reLoginsMax){
-                throw new APIAuthException("Cant authentificate after " + this.reLogins + " times");
-            }
-
-            this.reLogins++;
-
-            this.logIn();
+            this.reLogin();
             return this.getData(params);
         }
         else{

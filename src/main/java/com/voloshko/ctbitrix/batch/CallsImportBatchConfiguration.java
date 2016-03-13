@@ -97,6 +97,7 @@ public class CallsImportBatchConfiguration {
     ){
        return stepBuilderFactory.get("callsImportStep")
                // представляется верным, что chunk size - это эквивалент commit interval
+               // поэтому делаем chunk size = 1
                 .<List<Call>, List<Call>>chunk(1)
                 .reader(callsReader)
                 .processor(itemProcessor)
