@@ -8,6 +8,20 @@
     <artifactId>ct-bitrix</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+
+    <properties>
+        <!--spring-boot.version>1.1.8.RELEASE</spring-boot.version-->
+        <spring-boot.version>1.3.3.RELEASE</spring-boot.version>
+        <!--spring-boot-dependencies.version>1.2.4.RELEASE</spring-boot-dependencies.version-->
+        <spring-boot-dependencies.version>${spring-boot.version}</spring-boot-dependencies.version>
+        <springframework.version>4.2.5.RELEASE</springframework.version>
+        <!--springframework.spring-data-jpa.version>1.7.1.RELEASE</springframework.spring-data-jpa.version-->
+        <springframework.spring-data-jpa.version>1.9.0.RELEASE</springframework.spring-data-jpa.version>
+        <start-class>com.voloshko.ctbitrix.Application</start-class>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -15,7 +29,7 @@
             <artifactId>spring-boot-dependencies</artifactId>
             <type>pom</type>
             <!--scope>import</scope-->
-            <version>1.2.4.RELEASE</version>
+            <version>${spring-boot-dependencies.version}</version>
         </dependency>
 
         <dependency>
@@ -35,7 +49,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>1.1.8.RELEASE</version>
+            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
@@ -51,42 +65,68 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
-            <version>1.1.8.RELEASE</version>
+            <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>1.9.0.RELEASE</version>
-        </dependency>
+            <version>1.9.1.RELEASE</version>
+        </dependency-->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>1.7.1.RELEASE</version>
+            <version>${springframework.spring-data-jpa.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.1.3.RELEASE</version>
+            <version>${springframework.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- batch processing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-batch</artifactId>
-            <version>1.1.8.RELEASE</version>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <!-- Spring core -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${springframework.version}</version>
         </dependency>
         <!-- Context support -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>4.1.6.RELEASE</version>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${springframework.version}</version>
         </dependency>
         <!-- security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>1.1.8.RELEASE</version>
+            <version>${spring-boot.version}</version>
         </dependency>
         <!-- Spring framework ends -->
 
@@ -160,11 +200,22 @@
         </dependency>
 
         <!-- JackSON -->
-        <dependency>
+        <!--dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.8.5</version>
+        </dependency-->
+        <!--dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.7.3</version>
+        </dependency-->
+
 
         <!-- JUnit -->
         <dependency>
@@ -199,18 +250,12 @@
     </dependencies>
 
 
-    <properties>
-        <start-class>com.voloshko.ctbitrix.Application</start-class>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>1.1.8.RELEASE</version>
+                <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.voloshko.ctbitrix.Application</mainClass>
                 </configuration>
@@ -233,7 +278,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <!--version>3.3</version-->
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

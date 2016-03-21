@@ -1,5 +1,7 @@
 package com.voloshko.ctbitrix.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
 import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIRequest;
 import com.voloshko.ctbitrix.exception.APIAuthException;
@@ -53,15 +55,17 @@ public abstract class APIServiceRequestsImpl implements APIService {
 
     @Override
     public  <T, TR, TE> T request(String url, HttpMethod method, HttpEntity<TR> request, RestTemplate rt, Class<T> cl, Class<TE> exceptionType) throws APIAuthException {
+        //ObjectMapper objectMapper = new ObjectMapper();
 
-        try {
+
+            //System.out.println("request: " + objectMapper.writeValueAsString(request.getBody()));
             HttpEntity<T> response;
             switch (method){
                 case GET:
                     UriComponentsBuilder uriComponentsBuilder = this.uriComponentsBuilderByParams(
                             request.getBody(), url
                     );
-
+                    System.out.println(uriComponentsBuilder.build().encode().toUri());
                     response = rt.exchange(uriComponentsBuilder.build().encode().toUri(), method, this.plainHttpEntity(), cl);
                     break;
                 default:
@@ -75,17 +79,9 @@ public abstract class APIServiceRequestsImpl implements APIService {
                 this.cookies = response.getHeaders().get("Set-Cookie");
             }
 
+          //  System.out.println("response: " + objectMapper.writeValueAsString(response.getBody()));
+
             return (T) response.getBody();
-        }
-        catch (Exception e){
-            if(exceptionType.isInstance(e)) {
-                System.out.println("request to calltracking failed with error: " + e.toString());
-                return null;
-            }
-            else{
-                throw e;
-            }
-        }
     }
 
     @Override
@@ -102,17 +98,24 @@ public abstract class APIServiceRequestsImpl implements APIService {
     protected UriComponentsBuilder uriComponentsBuilderByParams(Object obj, String url) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(url);
 
-        List<Field> fields = this.getFields(obj.getClass());
-        for (Field f : fields) {
-            try {
-                f.setAccessible(true);
-                if (f.get(obj) != null) {
-                    uriComponentsBuilder
-                            .queryParam(f.getName(), f.get(obj).toString());
-                    //params.add(f.getName(), f.get(amoCRMRequest).toString());
+        if(obj instanceof MultiValueMap){
+            for(Object key : ((MultiValueMap) obj).keySet()) {
+                uriComponentsBuilder.queryParam(key.toString(), ((MultiValueMap) obj).getFirst(key));
+            }
+        }
+        else {
+            List<Field> fields = this.getFields(obj.getClass());
+            for (Field f : fields) {
+                try {
+                    f.setAccessible(true);
+                    if (f.get(obj) != null) {
+                        uriComponentsBuilder
+                                .queryParam(f.getName(), f.get(obj).toString());
+                        //params.add(f.getName(), f.get(amoCRMRequest).toString());
+                    }
+                } catch (IllegalAccessException e) {
+                    //e.printStackTrace();
                 }
-            } catch (IllegalAccessException e) {
-                //e.printStackTrace();
             }
         }
 

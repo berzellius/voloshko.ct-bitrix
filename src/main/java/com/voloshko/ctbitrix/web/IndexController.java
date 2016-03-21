@@ -1,11 +1,13 @@
 package com.voloshko.ctbitrix.web;
 
+import com.voloshko.ctbitrix.dmodel.Call;
 import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIRequest;
 import com.voloshko.ctbitrix.exception.APIAuthException;
 import com.voloshko.ctbitrix.repository.CallRepository;
 import com.voloshko.ctbitrix.service.BitrixAPIService;
 import com.voloshko.ctbitrix.service.CallTrackingAPIService;
 import com.voloshko.ctbitrix.service.CallTrackingSourceConditionService;
+import com.voloshko.ctbitrix.service.CtBitrixBusinessLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +34,9 @@ public class IndexController extends BaseController {
     @Autowired
     BitrixAPIService bitrixAPIService;
 
+    @Autowired
+    CtBitrixBusinessLogicService ctBitrixBusinessLogicService;
+
     @RequestMapping
     public String indexPage(
             Model model
@@ -41,11 +46,14 @@ public class IndexController extends BaseController {
             //model.addAttribute("code", code);
             //model.addAttribute("domain", domain);
 
-        try {
-            bitrixAPIService.logIn();
-        } catch (APIAuthException e) {
-            System.out.println("login error");
-            e.printStackTrace();
+        Call call = callRepository.findOne(29l);
+
+        if(call != null && call.getState().equals(Call.State.NEW)){
+            try {
+                ctBitrixBusinessLogicService.processCall(call);
+            } catch (APIAuthException e) {
+                e.printStackTrace();
+            }
         }
 
         return "index";

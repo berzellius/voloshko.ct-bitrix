@@ -126,7 +126,7 @@ public class ServiceBeanConfiguration {
     @Bean
     public BitrixAPIService bitrixAPIService(){
         BitrixAPIService bitrixAPIService = new BitrixAPIServiceImpl();
-        bitrixAPIService.setInitialRefreshToken("n08ovaent0h7buwsf62a5au2as6c5ss6");
+        bitrixAPIService.setInitialRefreshToken("35wzfxh2gcipb13gk3bt7yo1hnk1yk6x");
         bitrixAPIService.setClientId("local.56df37285e4da7.92471890");
         bitrixAPIService.setClientSecret("6229e40ca74d812e4a8ada6ff19135ca");
         bitrixAPIService.setDefaultScope("crm");
@@ -134,6 +134,7 @@ public class ServiceBeanConfiguration {
         bitrixAPIService.setRedirectURI("http://localhost:8080/");
 
         bitrixAPIService.setLoginUrl("https://evrika-klin.bitrix24.ru/oauth/token/");
+        bitrixAPIService.setFunctionsUrl("https://evrika-klin.bitrix24.ru/rest/");
         bitrixAPIService.setLoginMethod(HttpMethod.GET);
 
         BitrixAPIRequestErrorHandler bitrixAPIRequestErrorHandler = new BitrixAPIRequestErrorHandler();
@@ -146,6 +147,11 @@ public class ServiceBeanConfiguration {
     public BitrixRefreshAccessService bitrixRefreshAccessService(){
         BitrixRefreshAccessService bitrixRefreshAccessService = new BitrixRefreshAccessServiceImpl();
         return bitrixRefreshAccessService;
+    }
+
+    @Bean
+    public CtBitrixBusinessLogicService ctBitrixBusinessLogicService(){
+        return new CtBitrixBusinessLogicServiceImpl();
     }
 
 }

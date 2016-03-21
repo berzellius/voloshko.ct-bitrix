@@ -41,8 +41,8 @@ public class WebInitializer extends SpringBootServletInitializer {
                 final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
                 characterEncodingFilter.setEncoding("UTF-8");
                 characterEncodingFilter.setForceEncoding(false);
-
-                servletContext.addFilter("characterEncodingFilter", characterEncodingFilter).addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*");
+                // TODO !! maybe back?
+                //servletContext.addFilter("characterEncodingFilter", characterEncodingFilter).addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*");
             }
         };
 
