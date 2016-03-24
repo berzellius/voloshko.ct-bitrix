@@ -85,9 +85,9 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
             );
 
             log.info("Created liveFeedMsg#".concat(liveFeedMsgID.toString()));
-
-            call.setState(Call.State.DONE);
-            callRepository.save(call);
         }
+
+        call.setState(Call.State.DONE);
+        callRepository.save(call);
     }
 }

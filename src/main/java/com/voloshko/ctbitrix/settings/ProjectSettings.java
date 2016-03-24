@@ -10,6 +10,5 @@ public interface ProjectSettings {
 
     public HashMap<String, String> getDatabaseConnectionConfig();
 
-    public boolean amoCRMReadOnlyMode();
 
 }

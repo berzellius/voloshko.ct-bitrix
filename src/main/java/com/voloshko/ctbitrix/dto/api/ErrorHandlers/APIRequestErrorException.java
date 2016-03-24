@@ -15,7 +15,7 @@ public class APIRequestErrorException extends RuntimeException {
     }
 
     public APIRequestErrorException(Map<String, Object> properties){
-        super();
+        super("error in request: " + properties.toString());
         this.setParams(properties);
     }
 

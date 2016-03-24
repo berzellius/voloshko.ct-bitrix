@@ -1,8 +1,10 @@
 package com.voloshko.ctbitrix.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
+import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMError;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLead;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLiveFeedMessage;
 import com.voloshko.ctbitrix.dto.api.bitrix.functions.*;
@@ -25,6 +27,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -136,10 +139,26 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
             }
         }
         catch(APIRequestErrorException e){
-            if(e.getParams().containsKey("code") && e.getParams().get("code").equals("401")){
-                // TODO нужна дополнительная обработка сообщения об ошибке
-                this.logIn();
-                return this.callCrmFunction(bitrixAPIFunction, responseClass, funcRespClass);
+            if(
+                    e.getParams().containsKey("code") &&
+                            e.getParams().get("code").equals("401") &&
+                            e.getParams().containsKey("body")
+                    ){
+                try {
+                    ObjectMapper om = new ObjectMapper();
+                    BitrixCRMError error = om.readValue((String) e.getParams().get("body"), BitrixCRMError.class);
+                    System.out.println("seems to be login error");
+                    if(error.getError().equals("expired_token")) {
+                        System.out.println("Okay, it is login error");
+                        this.logIn();
+                        return this.callCrmFunction(bitrixAPIFunction, responseClass, funcRespClass);
+                    }
+                    else{
+                        System.out.println("No, it is not login error!");
+                    }
+                } catch (IOException e1) {
+                    // nothing to do
+                }
             }
 
             throw e;

@@ -31,9 +31,6 @@ public class SchedulerImpl implements MainScheduler {
     @Autowired
     Job newCallsToCRMJob;
 
-    @Autowired
-    Job leadsFromSiteJob;
-
 
     @Autowired
     CallTrackingAPIService callTrackingAPIService;
@@ -65,6 +62,31 @@ public class SchedulerImpl implements MainScheduler {
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
         return hour;
+    }
+
+    @Scheduled(fixedDelay = 120000)
+    @Override
+    public void callsToCRMProcess(){
+        runCallsToCRM();
+    }
+
+    private void runCallsToCRM(){
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addDate("start", new Date());
+
+        System.out.println("START calls to CRM job!");
+
+        try {
+            jobLauncher.run(newCallsToCRMJob, jobParametersBuilder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException e) {
+            e.printStackTrace();
+        } catch (JobRestartException e) {
+            e.printStackTrace();
+        } catch (JobInstanceAlreadyCompleteException e) {
+            e.printStackTrace();
+        } catch (JobParametersInvalidException e) {
+            e.printStackTrace();
+        }
     }
 
     /*

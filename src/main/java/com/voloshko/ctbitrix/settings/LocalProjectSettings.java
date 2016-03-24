@@ -18,10 +18,5 @@ public class LocalProjectSettings extends CommonProjectSettings {
         return dbConnect;
     }
 
-    @Override
-    public boolean amoCRMReadOnlyMode() {
-        return true;
-    }
-
 
 }

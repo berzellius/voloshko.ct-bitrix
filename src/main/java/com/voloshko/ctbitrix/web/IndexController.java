@@ -46,7 +46,7 @@ public class IndexController extends BaseController {
             //model.addAttribute("code", code);
             //model.addAttribute("domain", domain);
 
-        Call call = callRepository.findOne(29l);
+        /*Call call = callRepository.findOne(29l);
 
         if(call != null && call.getState().equals(Call.State.NEW)){
             try {
@@ -54,6 +54,11 @@ public class IndexController extends BaseController {
             } catch (APIAuthException e) {
                 e.printStackTrace();
             }
+        }*/
+        try {
+            bitrixAPIService.testCrmFunction();
+        } catch (APIAuthException e) {
+            e.printStackTrace();
         }
 
         return "index";
