@@ -1,15 +1,17 @@
 package com.voloshko.ctbitrix.service;
 
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLiveFeedMessage;
+import com.voloshko.ctbitrix.dto.api.bitrix.entity.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.functions.BitrixAPIFunction;
 import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIFindByCommunicationRequest;
+import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIListRequest;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIFindByCommunicationResponse;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIResponse;
 import com.voloshko.ctbitrix.exception.APIAuthException;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResponseErrorHandler;
+
+import java.util.ArrayList;
 
 /**
  * Created by berz on 12.03.2016.
@@ -22,15 +24,21 @@ public interface BitrixAPIService {
 
     BitrixAPIFindByCommunicationResponse.Result findByCommunication(BitrixAPIFindByCommunicationRequest request) throws APIAuthException;
 
-    void testCrmFunction2() throws APIAuthException;
-
     Long postMessageInLiveFeed(String title, String message, BitrixCRMLiveFeedMessage.EntityType entityType, Long id) throws APIAuthException;
 
-    void testCrmFunction1() throws APIAuthException;
+    void updateBitrixCRMEntity(BitrixCRMEntityWithID bitrixCRMEntity) throws APIAuthException;
 
     Long createBitrixCRMEntity(BitrixCRMEntity bitrixCRMEntity) throws APIAuthException;
 
     void testCrmFunction() throws APIAuthException;
+
+    BitrixCRMLead getLeadByID(Long id) throws APIAuthException;
+
+    BitrixCRMContact getContactByID(Long id) throws APIAuthException;
+
+    BitrixCRMDeal getDealByID(Long id) throws APIAuthException;
+
+    ArrayList<BitrixCRMDeal> getDealsByRequest(BitrixAPIListRequest request) throws APIAuthException;
 
     String getAuth() throws APIAuthException;
 

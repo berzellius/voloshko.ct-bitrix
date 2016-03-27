@@ -126,7 +126,7 @@ public class ServiceBeanConfiguration {
     @Bean
     public BitrixAPIService bitrixAPIService(){
         BitrixAPIService bitrixAPIService = new BitrixAPIServiceImpl();
-        bitrixAPIService.setInitialRefreshToken("35wzfxh2gcipb13gk3bt7yo1hnk1yk6x");
+        bitrixAPIService.setInitialRefreshToken("n55ad1m2lwvgjsk2cbtzxa19edesct2e");
         bitrixAPIService.setClientId("local.56df37285e4da7.92471890");
         bitrixAPIService.setClientSecret("6229e40ca74d812e4a8ada6ff19135ca");
         bitrixAPIService.setDefaultScope("crm");

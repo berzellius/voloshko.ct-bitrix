@@ -111,4 +111,14 @@ public class MultiValueEntityField extends EntityField {
     public void setTypeId(String typeId) {
         this.typeId = typeId;
     }
+
+    public static boolean containsValue(ArrayList<MultiValueEntityField> fields, String value) {
+        for(MultiValueEntityField multiValueEntityField : fields){
+            if(multiValueEntityField.getValue().equals(value)){
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

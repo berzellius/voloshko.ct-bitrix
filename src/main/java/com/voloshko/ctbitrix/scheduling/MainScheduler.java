@@ -7,6 +7,9 @@ import org.springframework.scheduling.annotation.Scheduled;
  */
 public interface MainScheduler {
 
+    @Scheduled(fixedDelay = 60000)
+    void leadsFromSite();
+
     @Scheduled
     void callsToCRMProcess();
 

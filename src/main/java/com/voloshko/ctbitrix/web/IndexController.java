@@ -37,6 +37,16 @@ public class IndexController extends BaseController {
     @Autowired
     CtBitrixBusinessLogicService ctBitrixBusinessLogicService;
 
+    @RequestMapping(value = "update_conditions")
+    public String updCond(){
+        try {
+            callTrackingAPIService.updateMarketingChannelsFromCalltracking();
+        } catch (APIAuthException e) {
+            e.printStackTrace();
+        }
+        return "index";
+    }
+
     @RequestMapping
     public String indexPage(
             Model model

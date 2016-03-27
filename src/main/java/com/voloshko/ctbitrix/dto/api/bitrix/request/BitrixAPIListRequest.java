@@ -14,6 +14,10 @@ public class BitrixAPIListRequest extends BitrixAPIFunctionRequest {
     private ArrayEntityField select;
     private SortEntityField order;
 
+    public static BitrixAPIListRequest newInstance(){
+        return new BitrixAPIListRequest();
+    }
+
     @Override
     public boolean correct() {
         if(this.getAuth() == null || this.getAuth().equals("")) {

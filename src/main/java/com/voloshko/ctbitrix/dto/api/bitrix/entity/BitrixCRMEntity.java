@@ -12,4 +12,5 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BitrixCRMEntity {
 
+
 }

@@ -3,10 +3,7 @@ package com.voloshko.ctbitrix.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMError;
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLead;
-import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLiveFeedMessage;
+import com.voloshko.ctbitrix.dto.api.bitrix.entity.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.functions.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.request.*;
@@ -180,24 +177,6 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
         return result;
     }
 
-    public void testCrmFunction2() throws APIAuthException {
-        BitrixAPIFindByCommunicationResponse.Result result = this.findByCommunication(
-                BitrixAPIFindByCommunicationRequest.getInstance()
-                .entityType(BitrixAPIFindByCommunicationRequest.EntityType.LEAD)
-                .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
-                .values("89111234567", "89007654321")
-        );
-
-        if(result.getLead() != null && result.getLead().size() > 0){
-            for(Long leadId : result.getLead()){
-                this.postMessageInLiveFeed("Появился новый лид(из API)", "Сообщение о появлении лида", BitrixCRMLiveFeedMessage.EntityType.LEAD, leadId);
-            }
-        }
-
-        System.out.println("leads" + result.getLead());
-        System.out.println("companies " + result.getCompany());
-        System.out.println("contacts " + result.getContact());
-    }
 
     @Override
     public Long postMessageInLiveFeed(String title, String message, BitrixCRMLiveFeedMessage.EntityType entityType, Long id) throws APIAuthException {
@@ -210,30 +189,11 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
         return msgId;
     }
 
-    @Override
+    /*
     public void testCrmFunction1() throws APIAuthException {
-        /*BitrixAPICRMAddEntityFunction bitrixAPICRMAddEntityFunction = new BitrixAPICRMAddEntityFunction();
-        BitrixAPIAddEntityRequest bitrixAPIAddEntityRequest = new BitrixAPIAddEntityRequest();
-
-        BitrixCRMLead bitrixCRMLead = new BitrixCRMLead();
-        bitrixCRMLead.setTitle("New lead generated from API#2");
-        bitrixCRMLead.setSource_id("2");
-        bitrixCRMLead.setAssigned_by_id(1l);
-        //bitrixCRMLead.setPhone(MultiValueEntityField.arrayWithOneInstance(null, "WORK", "89111234567", null));
-        bitrixCRMLead.setPhone(
-                MultiValueEntityField.arrayList(
-                        MultiValueEntityField.newInstance(null, "WORK", "89111234567", null),
-                        MultiValueEntityField.newInstance(null, "WORK", "89007654321", null)
-                ));
-
-        bitrixAPIAddEntityRequest.setFields(bitrixCRMLead);
-        bitrixAPICRMAddEntityFunction.setRequest(bitrixAPIAddEntityRequest);
-        bitrixAPICRMAddEntityFunction.setName("crm.lead.add");
-
-        Long idCreated = this.callCrmFunction(bitrixAPICRMAddEntityFunction, bitrixAPICRMAddEntityFunction.getResponseClass(), Long.class);
-        System.out.println("Created entity: ".concat(idCreated.toString()));*/
         Long id = this.createBitrixCRMEntity(
                 BitrixCRMLead.newInstance()
+                        .marketingChannel("Яндекс.SEO")
                         .title("Test lead created by API#1")
                         .assignedByID(1l)
                                 // == Интернет-реклама
@@ -244,9 +204,25 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
                                         MultiValueEntityField.newInstance(null, "WORK", "89007654321", null)
                                 )
                         )
-                        .marketingChannel("Яндекс.SEO")
         );
         System.out.println("Created entity: ".concat(id.toString()));
+    }*/
+
+    @Override
+    public void updateBitrixCRMEntity(BitrixCRMEntityWithID bitrixCRMEntity) throws APIAuthException {
+        BitrixAPICRMUpdateEntityFunction bitrixAPICRMUpdateEntityFunction = new BitrixAPICRMUpdateEntityFunction();
+        BitrixAPIUpdateEntityRequest bitrixAPIUpdateEntityRequest = new BitrixAPIUpdateEntityRequest();
+
+        String functionName = BitrixAPICRMUpdateEntityFunction.getFunctionNameByEntity(bitrixCRMEntity);
+        if(functionName == null){
+            throw new IllegalArgumentException("i cant work with bitrix enitity of type [".concat(bitrixCRMEntity.getClass().getName()).concat("]"));
+        }
+        bitrixCRMEntity.setId(null);
+        bitrixAPIUpdateEntityRequest.setFields(bitrixCRMEntity);
+        bitrixAPICRMUpdateEntityFunction.setName(functionName);
+        bitrixAPICRMUpdateEntityFunction.setRequest(bitrixAPIUpdateEntityRequest);
+
+        this.callCrmFunction(bitrixAPICRMUpdateEntityFunction, bitrixAPICRMUpdateEntityFunction.getResponseClass(), Object.class);
     }
 
     @Override
@@ -285,6 +261,60 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
         for(BitrixCRMLead bitrixCRMLead : response){
             System.out.println("lead#" + bitrixCRMLead.getId() + " :: " + bitrixCRMLead);
         }
+    }
+
+    @Override
+    public BitrixCRMLead getLeadByID(Long id) throws APIAuthException {
+        BitrixAPICRMLeadListFunction bitrixAPICRMLeadListFunction = new BitrixAPICRMLeadListFunction();
+        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest();
+        bitrixAPIListRequest.filterOne("ID", id);
+        bitrixAPICRMLeadListFunction.setRequest(bitrixAPIListRequest);
+
+        ArrayList<BitrixCRMLead> response = this.callCrmFunction(bitrixAPICRMLeadListFunction, bitrixAPICRMLeadListFunction.getResponseClass(), ArrayList.class);
+        if(response == null || response.size() == 0){
+            return null;
+        }
+
+        return response.get(0);
+    }
+
+    @Override
+    public BitrixCRMContact getContactByID(Long id) throws APIAuthException {
+        BitrixAPICRMContactListFunction bitrixAPICRMContactListFunction = new BitrixAPICRMContactListFunction();
+        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest();
+        bitrixAPIListRequest.filterOne("ID", id);
+        bitrixAPICRMContactListFunction.setRequest(bitrixAPIListRequest);
+
+        ArrayList<BitrixCRMContact> response = this.callCrmFunction(bitrixAPICRMContactListFunction, bitrixAPICRMContactListFunction.getResponseClass(), ArrayList.class);
+        if(response == null || response.size() == 0){
+            return null;
+        }
+
+        return response.get(0);
+    }
+
+    @Override
+    public BitrixCRMDeal getDealByID(Long id) throws APIAuthException {
+        List<BitrixCRMDeal> deals = this.getDealsByRequest(BitrixAPIListRequest.newInstance().filterOne("ID", id));
+        if(deals != null && deals.size() > 0){
+            return deals.get(0);
+        }
+        else{
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<BitrixCRMDeal> getDealsByRequest(BitrixAPIListRequest request) throws APIAuthException {
+        BitrixAPICRMDealListFunction bitrixAPICRMDealListFunction = new BitrixAPICRMDealListFunction();
+        bitrixAPICRMDealListFunction.setRequest(request);
+
+        ArrayList<BitrixCRMDeal> response = this.callCrmFunction(bitrixAPICRMDealListFunction, bitrixAPICRMDealListFunction.getResponseClass(), ArrayList.class);
+        if(response == null || response.size() == 0){
+            return null;
+        }
+
+        return response;
     }
 
     @Override

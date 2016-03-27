@@ -480,5 +480,10 @@ public class CallTrackingAPIServiceImpl extends APIServiceRequestsImpl implement
         this.webSiteLoginMethod = webSiteLoginMethod;
     }
 
+    @Override
+    public Integer getProjectIdBySite(String origin) {
+        return projects[0];
+    }
+
 
 }
