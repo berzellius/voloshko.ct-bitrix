@@ -212,6 +212,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     public void updateBitrixCRMEntity(BitrixCRMEntityWithID bitrixCRMEntity) throws APIAuthException {
         BitrixAPICRMUpdateEntityFunction bitrixAPICRMUpdateEntityFunction = new BitrixAPICRMUpdateEntityFunction();
         BitrixAPIUpdateEntityRequest bitrixAPIUpdateEntityRequest = new BitrixAPIUpdateEntityRequest();
+        bitrixAPIUpdateEntityRequest.setId(bitrixCRMEntity.getId());
 
         String functionName = BitrixAPICRMUpdateEntityFunction.getFunctionNameByEntity(bitrixCRMEntity);
         if(functionName == null){

@@ -7,6 +7,7 @@ import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
  */
 public class BitrixAPIUpdateEntityRequest extends BitrixAPIFunctionRequest {
     private BitrixCRMEntity fields;
+    private String id;
 
     @Override
     public boolean correct() {
@@ -28,5 +29,13 @@ public class BitrixAPIUpdateEntityRequest extends BitrixAPIFunctionRequest {
 
     public void setFields(BitrixCRMEntity fields) {
         this.fields = fields;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

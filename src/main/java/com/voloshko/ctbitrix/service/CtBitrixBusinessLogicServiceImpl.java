@@ -190,7 +190,7 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
             // Получаем сущности по email
             BitrixAPIFindByCommunicationResponse.Result result = bitrixAPIService.findByCommunication(
                     BitrixAPIFindByCommunicationRequest.getInstance()
-                            .values(phone)
+                            .values(email)
                             .type(BitrixAPIFindByCommunicationRequest.Type.EMAIL)
             );
 
@@ -238,6 +238,9 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                 log.info(crmDeals.size() + " deals found by contact#" + contactID);
                 deals.addAll(crmDeals);
             }
+            else{
+                log.info("no deals found by contact#" + contactID);
+            }
         }
 
         BitrixCRMLead equalLead = null;
@@ -247,10 +250,11 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
             log.info("working with lead#" + leadID);
             BitrixCRMLead crmLead = bitrixAPIService.getLeadByID(leadID);
             if(crmLead.getMarketingChannel() == null || crmLead.getMarketingChannel().equals("")){
+                log.info("need to update marketing channel...");
                 crmLead.setMarketingChannel(source);
+                bitrixAPIService.updateBitrixCRMEntity(crmLead);
+                log.info("updated!");
             }
-
-            bitrixAPIService.updateBitrixCRMEntity(crmLead);
 
             Boolean phoneCond =
                     (phone != null && MultiValueEntityField.containsValue(crmLead.getPhone(), phone)) ||
@@ -264,6 +268,9 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                 log.info("lead#" + leadID + " is equal Lead by email/phone");
                 equalLead = crmLead;
             }
+            else{
+                log.info("lead#" + leadID + " is NOT equal Lead by email/phone");
+            }
 
             ArrayList<BitrixCRMDeal> crmDeals = bitrixAPIService.getDealsByRequest(
                     BitrixAPIListRequest.newInstance().filterOne("LEAD_ID", leadID)
@@ -272,6 +279,9 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
             if(crmDeals != null && crmDeals.size() > 0){
                 log.info(crmDeals.size() + " deals found by lead#" + leadID);
                 deals.addAll(crmDeals);
+            }
+            else{
+                log.info("no deals found by lead#" + leadID);
             }
         }
 
@@ -292,7 +302,8 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
 
             BitrixCRMLead bitrixCRMLead = (BitrixCRMLead) BitrixCRMLead.newInstance()
                     .marketingChannel(source)
-                    .title("Автоматически - Заявка с сайта [через API] ")
+                    .title("Автоматически - Заявка с сайта [через API]: " +
+                            ((leadFromSite.getLead().getName() != null)? leadFromSite.getLead().getName() : null))
                             // == Алена Волошко
                     .assignedByID(1l)
                             // == Интернет-реклама

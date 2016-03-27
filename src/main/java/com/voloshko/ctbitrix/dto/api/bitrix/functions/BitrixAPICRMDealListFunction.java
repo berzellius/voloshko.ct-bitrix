@@ -11,7 +11,7 @@ import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIResponse;
 public class BitrixAPICRMDealListFunction extends BitrixAPIFunction {
 
     protected final String name = "crm.deal.list";
-    protected final Class<? extends BitrixAPIResponse> responseClass = BitrixAPIContactListResponse.class;
+    protected final Class<? extends BitrixAPIResponse> responseClass = BitrixAPIDealListResponse.class;
     protected BitrixAPIListRequest request;
     protected BitrixAPIDealListResponse response;
 
