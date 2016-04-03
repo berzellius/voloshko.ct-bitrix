@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Created by berz on 27.03.2016.
@@ -83,5 +84,27 @@ public class BitrixCRMContact extends BitrixCRMEntityCCL {
     @JsonIgnore
     public void setMarketingChannel(String marketingChannel){
         this.setUf_crm_56E58DA18BA6B(marketingChannel);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof BitrixCRMContact)){
+            return false;
+        }
+
+        if(obj == this){
+            return true;
+        }
+
+        if(this.getId() == null){
+            return false;
+        }
+
+        return this.getId().equals(((BitrixCRMContact) obj).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(11, 15).append(this.getId()).toHashCode();
     }
 }

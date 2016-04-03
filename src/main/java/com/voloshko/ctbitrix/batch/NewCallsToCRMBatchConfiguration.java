@@ -61,8 +61,14 @@ public class NewCallsToCRMBatchConfiguration {
         return new ItemProcessor<Call, Call>() {
             @Override
             public Call process(Call call) throws Exception {
-                ctBitrixBusinessLogicService.processCall(call);
-                return call;
+                try {
+                    ctBitrixBusinessLogicService.processCall(call);
+                    return call;
+                }
+                catch (RuntimeException e){
+                    e.printStackTrace();
+                    throw e;
+                }
             }
         };
     }

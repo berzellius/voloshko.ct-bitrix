@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BitrixCRMEntityCCL extends BitrixCRMEntityCCLD {
+public abstract class BitrixCRMEntityCCL extends BitrixCRMEntityCCLD {
     @JsonProperty("ADDRESS")
     private String address;
     @JsonProperty("ADDRESS_2")

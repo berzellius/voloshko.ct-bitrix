@@ -20,6 +20,10 @@ import java.util.ArrayList;
 public interface BitrixAPIService {
 
 
+    void attach(BitrixCRMEntityWithID bitrixCRMEntityWithID);
+
+    void flush() throws APIAuthException;
+
     <TResp extends BitrixAPIResponse, TFuncResp> TFuncResp callCrmFunction(BitrixAPIFunction bitrixAPIFunction, Class<TResp> responseClass, Class<TFuncResp> funcRespClass) throws APIAuthException;
 
     BitrixAPIFindByCommunicationResponse.Result findByCommunication(BitrixAPIFindByCommunicationRequest request) throws APIAuthException;

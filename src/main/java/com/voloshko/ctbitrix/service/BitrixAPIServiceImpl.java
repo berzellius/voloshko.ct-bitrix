@@ -1,6 +1,7 @@
 package com.voloshko.ctbitrix.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.text.log.LoggerFactory;
 import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
 import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
@@ -13,6 +14,7 @@ import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIResponse;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixRefreshAccessResponse;
 import com.voloshko.ctbitrix.exception.APIAuthException;
 import com.voloshko.ctbitrix.utils.ClassUtil;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,11 +23,14 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import javax.transaction.Transactional;
+
+
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -50,9 +55,40 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
 
     private HttpMethod loginMethod;
 
+    private HashSet<BitrixCRMEntityWithID> attachedEntities = new HashSet<>();
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(BitrixAPIService.class);
 
     @Autowired
     private BitrixRefreshAccessService bitrixRefreshAccessService;
+
+    @Override
+    public void attach(BitrixCRMEntityWithID bitrixCRMEntityWithID){
+        if(bitrixCRMEntityWithID.getId() != null && !this.attachedEntities.contains(bitrixCRMEntityWithID)){
+            log.info("Attaching entity of class `"
+                    .concat(bitrixCRMEntityWithID.getClass().getName())
+                    .concat("` #")
+                    .concat(bitrixCRMEntityWithID.getId().toString())
+            );
+            this.attachedEntities.add(bitrixCRMEntityWithID);
+        }
+    }
+
+    @Override
+    public void flush() throws APIAuthException {
+        log.info("flushing entities from BitrixAPIService");
+        for(BitrixCRMEntityWithID bitrixCRMEntityWithID : this.attachedEntities){
+            log.info(
+                    "flushing "
+                            .concat(bitrixCRMEntityWithID.getClass().getName())
+                            .concat("#")
+                            .concat(bitrixCRMEntityWithID.getId().toString())
+            );
+            this.updateBitrixCRMEntity(bitrixCRMEntityWithID);
+        }
+
+        this.attachedEntities = new HashSet<>();
+    }
 
     @Override
     public RestTemplate getRestTemplate() {
@@ -304,6 +340,8 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
             return null;
         }
 
+        this.attach(response.get(0));
+
         return response.get(0);
     }
 
@@ -319,6 +357,8 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
             return null;
         }
 
+        this.attach(response.get(0));
+
         return response.get(0);
     }
 
@@ -326,6 +366,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     public BitrixCRMDeal getDealByID(Long id) throws APIAuthException {
         List<BitrixCRMDeal> deals = this.getDealsByRequest(BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("ID", id));
         if(deals != null && deals.size() > 0){
+            this.attach(deals.get(0));
             return deals.get(0);
         }
         else{
@@ -343,6 +384,10 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
             return null;
         }
 
+        for(BitrixCRMDeal deal : response){
+            this.attach(deal);
+        }
+
         return response;
     }
 
@@ -358,6 +403,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = RuntimeException.class)
     public void logIn() throws APIAuthException {
         BitrixRefreshAccess bitrixRefreshAccess = bitrixRefreshAccessService.getLastRefreshAccess();
 

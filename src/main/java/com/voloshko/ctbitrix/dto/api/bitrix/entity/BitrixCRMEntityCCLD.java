@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BitrixCRMEntityCCLD extends BitrixCRMEntityWithID {
+public abstract class BitrixCRMEntityCCLD extends BitrixCRMEntityWithID {
     @RequireByDefault
     @JsonProperty("ASSIGNED_BY_ID")
     private Long assigned_by_id;

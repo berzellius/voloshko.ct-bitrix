@@ -63,26 +63,48 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                 );
 
         Long leadID = null;
-        Long contactID = null;
+        BitrixCRMContact crmContact = null;
         ArrayList<BitrixCRMDeal> deals = new ArrayList<>();
+
+        if(findByPhone.getContact() != null && findByPhone.getContact().size() > 0){
+            Long contactID = findByPhone.getContact().get(0);
+            crmContact = bitrixAPIService.getContactByID(contactID);
+            if(crmContact.getMarketingChannel() == null || crmContact.getMarketingChannel().equals("")){
+                crmContact.setMarketingChannel(call.getSource());
+                crmContact.setChanged(true);
+            }
+            log.info("found contact by 'findByCommunication' function: contact#".concat(contactID.toString()));
+        }
 
         if(findByPhone.getLead() != null && findByPhone.getLead().size() > 0){
             leadID = findByPhone.getLead().get(0);
+            log.info("found lead by 'findByCommunication' function: lead#".concat(leadID.toString()));
+        }
+        else if(crmContact != null){
 
+            if(crmContact.getLead_id() != null){
+                leadID = crmContact.getLead_id();
+                log.info("found lead from contact#".concat(crmContact.getId()).concat(": lead#").concat(leadID.toString()));
+            }
+        }
+
+        if(leadID != null) {
+            log.info("work with lead#".concat(leadID.toString()));
             BitrixCRMLead lead = bitrixAPIService.getLeadByID(leadID);
             if(lead.getMarketingChannel() == null || lead.getMarketingChannel().equals("")){
                 lead.setMarketingChannel(call.getSource());
-            }
-            if(findByPhone.getContact() != null && findByPhone.getContact().size() > 0){
-                contactID = findByPhone.getContact().get(0);
-                if(lead.getContact_id() == null) {
-                    lead.contactID(contactID);
-                }
+                lead.setChanged(true);
             }
 
-            bitrixAPIService.updateBitrixCRMEntity(lead);
+            Long liveFeedMsgID = bitrixAPIService.postMessageInLiveFeed(
+                    "Повторный звонок с номера ".concat(call.getNumber()),
+                    "Лид по такому звонку уже существует",
+                    BitrixCRMLiveFeedMessage.EntityType.LEAD,
+                    leadID
+            );
         }
         else{
+            log.info("need to create new lead");
             BitrixCRMLead bitrixCRMLeadToCreate = (BitrixCRMLead) BitrixCRMLead.newInstance()
                 .marketingChannel(call.getSource())
                 .title("Автоматически - Calltracking [через API] (".concat(call.getNumber()).concat(")"))
@@ -96,10 +118,11 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                         )
                 );
 
-            if(findByPhone.getContact() != null && findByPhone.getContact().size() > 0){
-                contactID = findByPhone.getContact().get(0);
-                bitrixCRMLeadToCreate.contactID(contactID);
+            if(bitrixCRMLeadToCreate.getContact_id() == null && crmContact != null){
+                bitrixCRMLeadToCreate.contactID(Long.decode(crmContact.getId()));
             }
+
+
 
             leadID = bitrixAPIService.createBitrixCRMEntity(
                     bitrixCRMLeadToCreate
@@ -123,19 +146,28 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
 
         if(leadID != null){
             log.info("searching deal by lead#".concat(leadID.toString()));
-            deals.addAll(bitrixAPIService.getDealsByRequest(
+            ArrayList<BitrixCRMDeal> dealsByLead = bitrixAPIService.getDealsByRequest(
                     BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("LEAD_ID", leadID)
-            ));
+            );
+            if(dealsByLead != null) {
+                deals.addAll(dealsByLead);
+            }
         }
 
-        if(contactID != null){
-            log.info("searching deal by contact#".concat(contactID.toString()));
-            deals.addAll(bitrixAPIService.getDealsByRequest(
-                    BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("CONTACT_ID", contactID)
-            ));
+        if(crmContact != null){
+            log.info("searching deal by contact#".concat(crmContact.getId()));
+            ArrayList<BitrixCRMDeal> dealsByContacts = bitrixAPIService.getDealsByRequest(
+                    BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("CONTACT_ID", Long.decode(crmContact.getId()))
+            );
+            if(dealsByContacts != null) {
+                deals.addAll(dealsByContacts);
+            }
+
         }
 
         this.marketingChannelToDeals(deals, call.getSource());
+
+        bitrixAPIService.flush();
 
         call.setState(Call.State.DONE);
         callRepository.save(call);
@@ -270,17 +302,18 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
         if(equalContact != null){
             if(equalContact.getMarketingChannel() == null || equalContact.getMarketingChannel().equals("")){
                 equalContact.setMarketingChannel(source);
+                equalContact.setChanged(true);
             }
 
             if(phone != null && !MultiValueEntityField.containsValue(equalContact.getPhone(), phone)){
                 equalContact.addPhone(phone, "WORK");
+                equalContact.setChanged(true);
             }
 
             if(email != null && !MultiValueEntityField.containsValue(equalContact.getEmail(), email)){
                equalContact.addEmail(email, "WORK");
+                equalContact.setChanged(true);
             }
-
-            bitrixAPIService.updateBitrixCRMEntity(equalContact);
         }
 
         // Проходимся по полученным Лидам и заполняем поле Рекламный канал там, где оно не заполнено
@@ -362,19 +395,25 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
         log.info("Processing lead from site is over.");
 
         leadFromSite.setState(LeadFromSite.State.DONE);
+
+        bitrixAPIService.flush();
+
         leadFromSiteRepository.save(leadFromSite);
         return leadFromSite;
     }
 
-    public void marketingChannelToDeals(ArrayList<BitrixCRMDeal> deals, String marketingChannel) throws APIAuthException {
+    private void marketingChannelToEntities(){
+
+    }
+
+    private void marketingChannelToDeals(ArrayList<BitrixCRMDeal> deals, String marketingChannel) throws APIAuthException {
 
         for(BitrixCRMDeal deal : deals){
             log.info("working with deal#" + deal.getId());
             if(deal.getMarketingChannel() == null || deal.getMarketingChannel().equals("")){
                 log.info("empty marketing channel. updating");
                 deal.setMarketingChannel(marketingChannel);
-
-                bitrixAPIService.updateBitrixCRMEntity(deal);
+                deal.setChanged(true);
             }
         }
     }

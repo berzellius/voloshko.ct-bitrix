@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.MultiValueEntityField;
 import lombok.Data;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
 
@@ -149,5 +150,27 @@ public class BitrixCRMLead extends BitrixCRMEntityCCL {
 
     public void setUf_crm_1457876076(String uf_crm_1457876076) {
         this.uf_crm_1457876076 = uf_crm_1457876076;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof BitrixCRMLead)){
+            return false;
+        }
+
+        if(obj == this){
+            return true;
+        }
+
+        if(this.getId() == null){
+            return false;
+        }
+
+        return this.getId().equals(((BitrixCRMLead) obj).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(11, 11).append(this.getId()).toHashCode();
     }
 }
