@@ -59,7 +59,14 @@ public class LeadsFromSiteImportToCRM {
         return new ItemProcessor<LeadFromSite, LeadFromSite>() {
             @Override
             public LeadFromSite process(LeadFromSite leadFromSite) throws Exception {
-                return ctBitrixBusinessLogicService.processLeadFromSite(leadFromSite);
+                try {
+                    return ctBitrixBusinessLogicService.processLeadFromSite(leadFromSite);
+                }
+                catch(RuntimeException e){
+                    System.out.println("exception while processing LeadFromSite");
+                    e.printStackTrace();
+                    throw e;
+                }
             }
         };
     }

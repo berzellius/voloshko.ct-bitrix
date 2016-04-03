@@ -1,5 +1,6 @@
 package com.voloshko.ctbitrix.dto.api.bitrix.request;
 
+import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.ArrayEntityField;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.RangeEntityField;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.SortEntityField;
@@ -14,8 +15,14 @@ public class BitrixAPIListRequest extends BitrixAPIFunctionRequest {
     private ArrayEntityField select;
     private SortEntityField order;
 
-    public static BitrixAPIListRequest newInstance(){
-        return new BitrixAPIListRequest();
+    private Class<? extends BitrixCRMEntity> entityType;
+
+    public BitrixAPIListRequest(Class<? extends BitrixCRMEntity> entityType) {
+        this.entityType = entityType;
+    }
+
+    public static BitrixAPIListRequest newInstance(Class<? extends BitrixCRMEntity> entityType){
+        return new BitrixAPIListRequest(entityType);
     }
 
     @Override
@@ -37,6 +44,14 @@ public class BitrixAPIListRequest extends BitrixAPIFunctionRequest {
         }
 
         return true;
+    }
+
+    public boolean emptySelect(){
+        return  (
+                this.getSelect() == null ||
+                        this.getSelect().getValues() == null ||
+                        this.getSelect().getValues().size() == 0
+                );
     }
 
     public BitrixAPIListRequest select(String... selectFields){
@@ -131,5 +146,9 @@ public class BitrixAPIListRequest extends BitrixAPIFunctionRequest {
 
     public void setFilter(RangeEntityField filter) {
         this.filter = filter;
+    }
+
+    public Class<? extends BitrixCRMEntity> getEntityType() {
+        return entityType;
     }
 }

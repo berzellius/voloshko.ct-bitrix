@@ -3,6 +3,7 @@ package com.voloshko.ctbitrix.dto.api.bitrix.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.MultiValueEntityField;
 import lombok.Data;
 
@@ -15,23 +16,32 @@ import java.util.ArrayList;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonDeserialize(using = BitrixEntityDeserializer.class)
 public class BitrixCRMLead extends BitrixCRMEntityCCL {
+    @RequireByDefault
     @JsonProperty("TITLE")
     private String title;
+    @RequireByDefault
     @JsonProperty("COMPANY_TITLE")
     private String company_title;
+    @RequireByDefault
     @JsonProperty("STATUS_ID")
     private String status_id;
+    @RequireByDefault
     @JsonProperty("STATUS_DESCRIPTION")
     private String status_description;
+    @RequireByDefault
     @JsonProperty("CURRENCY_ID")
     private String currency_id;
+    @RequireByDefault
     @JsonProperty("OPPORTUNITY")
     private String opportunity;
+    @RequireByDefault
     @JsonProperty("CONTACT_ID")
     private Long contact_id;
+    @RequireByDefault
     @JsonProperty("DATE_CLOSED")
     private String date_closed;
     // Поле "Рекламный канал"
+    @RequireByDefault
     @JsonProperty("UF_CRM_1457876076")
     private String uf_crm_1457876076;
 

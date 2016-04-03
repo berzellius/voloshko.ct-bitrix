@@ -2,6 +2,7 @@ package com.voloshko.ctbitrix.dto.api.bitrix.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import lombok.Data;
 
 /**
@@ -10,22 +11,31 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BitrixCRMEntityCCLD extends BitrixCRMEntityWithID {
+    @RequireByDefault
     @JsonProperty("ASSIGNED_BY_ID")
     private Long assigned_by_id;
+    @RequireByDefault
     @JsonProperty("COMPANY_ID")
     private Long company_id;
+    @RequireByDefault
     @JsonProperty("CREATED_BY_ID")
     private Long created_by_id;
+    @RequireByDefault
     @JsonProperty("DATE_CREATE")
     private String date_create;
+    @RequireByDefault
     @JsonProperty("DATE_MODIFY")
     private String date_modify;
+    @RequireByDefault
     @JsonProperty("MODIFY_BY_ID")
     private Long modify_by_id;
+    @RequireByDefault
     @JsonProperty("OPENED")
     private String opened;
+    @RequireByDefault
     @JsonProperty("ORIGIN_ID")
     private String origin_id;
+    @RequireByDefault
     @JsonProperty("ORIGINATOR_ID")
     private String originator_id;
 

@@ -2,6 +2,7 @@ package com.voloshko.ctbitrix.dto.api.bitrix.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.MultiValueEntityField;
 import lombok.Data;
 
@@ -29,26 +30,37 @@ public class BitrixCRMEntityCCL extends BitrixCRMEntityCCLD {
     private String address_country;
     @JsonProperty("ADDRESS_COUNTRY_CODE")
     private String address_country_code;
+    @RequireByDefault
     @JsonProperty("COMMENTS")
     private String comments;
+    @RequireByDefault
     @JsonProperty("PHONE")
     private ArrayList<MultiValueEntityField> phone;
+    @RequireByDefault
     @JsonProperty("EMAIL")
     private ArrayList<MultiValueEntityField> email;
+    @RequireByDefault
     @JsonProperty("WEB")
     private ArrayList<MultiValueEntityField> web;
+    @RequireByDefault
     @JsonProperty("IM")
     private ArrayList<MultiValueEntityField> im;
+    @RequireByDefault
     @JsonProperty("NAME")
     private String name;
+    @RequireByDefault
     @JsonProperty("SECOND_NAME")
     private String second_name;
+    @RequireByDefault
     @JsonProperty("LAST_NAME")
     private String last_name;
+    @RequireByDefault
     @JsonProperty("POST")
     private String post;
+    @RequireByDefault
     @JsonProperty("SOURCE_ID")
     private String source_id;
+    @RequireByDefault
     @JsonProperty("SOURCE_DESCRIPTION")
     private String source_description;
 
@@ -62,8 +74,33 @@ public class BitrixCRMEntityCCL extends BitrixCRMEntityCCLD {
         return this;
     }
 
+    public BitrixCRMEntityCCL addPhone(String value, String valueType){
+        if(this.getPhone() == null){
+            return this.phones(MultiValueEntityField.arrayWithOneInstance(null, valueType, value, null));
+        }
+
+        this.getPhone().add(MultiValueEntityField.newInstance(null, valueType, value, null));
+
+        return this;
+    }
+
+    public BitrixCRMEntityCCL addEmail(String value, String valueType){
+        if(this.getEmail() == null){
+            return this.emails(MultiValueEntityField.arrayWithOneInstance(null, valueType, value, null));
+        }
+
+        this.getEmail().add(MultiValueEntityField.newInstance(null, valueType, value, null));
+
+        return this;
+    }
+
     public BitrixCRMEntityCCL emails(ArrayList<MultiValueEntityField> emails){
         this.setEmail(emails);
+        return this;
+    }
+
+    public BitrixCRMEntityCCL webs(ArrayList<MultiValueEntityField> webs){
+        this.setWeb(webs);
         return this;
     }
 

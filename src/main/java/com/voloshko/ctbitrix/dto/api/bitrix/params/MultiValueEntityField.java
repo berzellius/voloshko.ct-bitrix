@@ -48,6 +48,13 @@ public class MultiValueEntityField extends EntityField {
     public MultiValueEntityField() {
     }
 
+    public boolean equals(Object obj){
+        if(this.getValue() == null)
+            return false;
+
+        return obj instanceof MultiValueEntityField && this.getValue().equals(((MultiValueEntityField) obj).getValue());
+    }
+
     @Override
     public void addValuesToMultiValueMap(String key, MultiValueMap<String, String> map) {
         if(this.getId() != null){
@@ -113,8 +120,15 @@ public class MultiValueEntityField extends EntityField {
     }
 
     public static boolean containsValue(ArrayList<MultiValueEntityField> fields, String value) {
+        if(
+                fields == null ||
+                        value == null
+                ){
+            return false;
+        }
+
         for(MultiValueEntityField multiValueEntityField : fields){
-            if(multiValueEntityField.getValue().equals(value)){
+            if(multiValueEntityField.equals(new MultiValueEntityField(null, null, value, null))){
                 return true;
             }
         }

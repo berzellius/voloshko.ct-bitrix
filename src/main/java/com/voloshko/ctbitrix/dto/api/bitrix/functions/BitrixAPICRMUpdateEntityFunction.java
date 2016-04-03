@@ -5,13 +5,14 @@ import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMDeal;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMLead;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIEntityCreatedResponse;
+import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIEntityUpdatedResponse;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIResponse;
 
 /**
  * Created by berz on 18.03.2016.
  */
 public class BitrixAPICRMUpdateEntityFunction extends BitrixAPIFunction {
-    protected final Class<? extends BitrixAPIResponse> responseClass = BitrixAPIEntityCreatedResponse.class;
+    protected final Class<? extends BitrixAPIResponse> responseClass = BitrixAPIEntityUpdatedResponse.class;
     protected BitrixAPIEntityCreatedResponse response;
 
     public static String getFunctionNameByEntity(BitrixCRMEntity bitrixCRMEntity){

@@ -3,6 +3,7 @@ package com.voloshko.ctbitrix.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
+import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.functions.*;
 import com.voloshko.ctbitrix.dto.api.bitrix.params.*;
@@ -11,6 +12,7 @@ import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIFindByCommunicatio
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixAPIResponse;
 import com.voloshko.ctbitrix.dto.api.bitrix.response.BitrixRefreshAccessResponse;
 import com.voloshko.ctbitrix.exception.APIAuthException;
+import com.voloshko.ctbitrix.utils.ClassUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -25,6 +27,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -102,6 +106,28 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
             throw new IllegalStateException(msg);
         }
 
+        if(BitrixAPIListRequest.class.isAssignableFrom(bitrixAPIFunction.getRequest().getClass())){
+            // class of bitrixAPIFunction.getRequest() instance of BitrixAPIListRequest
+            BitrixAPIListRequest req = (BitrixAPIListRequest) bitrixAPIFunction.getRequest();
+
+            if(req.emptySelect()){
+                Field[] fields = ClassUtil.getAnnotatedDeclaredFields(
+                        ((BitrixAPIListRequest) bitrixAPIFunction.getRequest()).getEntityType(),
+                        RequireByDefault.class,
+                        true
+                );
+
+                List<String> select = new ArrayList<>();
+                for(Field f : fields){
+                    select.add(f.getName().toUpperCase());
+                }
+                if(select.size() > 0) {
+                    String[] s = (String[]) select.toArray(new String[select.size()]);
+                    ((BitrixAPIListRequest) bitrixAPIFunction.getRequest()).select(s);
+                }
+            }
+        }
+
         String url = this.getFunctionsUrl().concat(bitrixAPIFunction.getName());
         MultiValueMap<String, String> map = bitrixAPIFunction.getRequest().entityFieldsToMultiValueMap();
         map.add("auth", bitrixAPIFunction.getRequest().getAuth());
@@ -144,14 +170,13 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
                 try {
                     ObjectMapper om = new ObjectMapper();
                     BitrixCRMError error = om.readValue((String) e.getParams().get("body"), BitrixCRMError.class);
-                    System.out.println("seems to be login error");
                     if(error.getError().equals("expired_token")) {
-                        System.out.println("Okay, it is login error");
                         this.logIn();
                         return this.callCrmFunction(bitrixAPIFunction, responseClass, funcRespClass);
                     }
                     else{
-                        System.out.println("No, it is not login error!");
+                        System.out.println("Error in request!");
+                        e.printStackTrace();
                     }
                 } catch (IOException e1) {
                     // nothing to do
@@ -212,7 +237,10 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     public void updateBitrixCRMEntity(BitrixCRMEntityWithID bitrixCRMEntity) throws APIAuthException {
         BitrixAPICRMUpdateEntityFunction bitrixAPICRMUpdateEntityFunction = new BitrixAPICRMUpdateEntityFunction();
         BitrixAPIUpdateEntityRequest bitrixAPIUpdateEntityRequest = new BitrixAPIUpdateEntityRequest();
-        bitrixAPIUpdateEntityRequest.setId(bitrixCRMEntity.getId());
+
+        SimpleEntityField id = new SimpleEntityField();
+        id.setValue(bitrixCRMEntity.getId());
+        bitrixAPIUpdateEntityRequest.setId(id);
 
         String functionName = BitrixAPICRMUpdateEntityFunction.getFunctionNameByEntity(bitrixCRMEntity);
         if(functionName == null){
@@ -223,7 +251,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
         bitrixAPICRMUpdateEntityFunction.setName(functionName);
         bitrixAPICRMUpdateEntityFunction.setRequest(bitrixAPIUpdateEntityRequest);
 
-        this.callCrmFunction(bitrixAPICRMUpdateEntityFunction, bitrixAPICRMUpdateEntityFunction.getResponseClass(), Object.class);
+        this.callCrmFunction(bitrixAPICRMUpdateEntityFunction, bitrixAPICRMUpdateEntityFunction.getResponseClass(), Boolean.class);
     }
 
     @Override
@@ -246,13 +274,13 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     @Override
     public void testCrmFunction() throws APIAuthException {
         BitrixAPICRMLeadListFunction bitrixAPICRMLeadListFunction = new BitrixAPICRMLeadListFunction();
-        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest();
+        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest(BitrixCRMLead.class);
         bitrixAPIListRequest
                 //.filterOne("ID", 19l)
                 //.filterFrom("ID", 11l, RangeEntityField.BoundType.STRICT)
                 //.filterTo("ID", 37l, RangeEntityField.BoundType.STRICT)
                 .range("ID", 6910l, 6920l, RangeEntityField.BoundType.UNSTRICT, RangeEntityField.BoundType.UNSTRICT)
-                .select("ID", "TITLE", "SOURCE_ID", "PHONE")
+                //.select("ID", "TITLE", "SOURCE_ID", "PHONE")
                 .sort("ID", SortEntityField.Direction.DESC);
 
 
@@ -267,7 +295,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     @Override
     public BitrixCRMLead getLeadByID(Long id) throws APIAuthException {
         BitrixAPICRMLeadListFunction bitrixAPICRMLeadListFunction = new BitrixAPICRMLeadListFunction();
-        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest();
+        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest(BitrixCRMLead.class);
         bitrixAPIListRequest.filterOne("ID", id);
         bitrixAPICRMLeadListFunction.setRequest(bitrixAPIListRequest);
 
@@ -282,7 +310,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     @Override
     public BitrixCRMContact getContactByID(Long id) throws APIAuthException {
         BitrixAPICRMContactListFunction bitrixAPICRMContactListFunction = new BitrixAPICRMContactListFunction();
-        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest();
+        BitrixAPIListRequest bitrixAPIListRequest = new BitrixAPIListRequest(BitrixCRMContact.class);
         bitrixAPIListRequest.filterOne("ID", id);
         bitrixAPICRMContactListFunction.setRequest(bitrixAPIListRequest);
 
@@ -296,7 +324,7 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
 
     @Override
     public BitrixCRMDeal getDealByID(Long id) throws APIAuthException {
-        List<BitrixCRMDeal> deals = this.getDealsByRequest(BitrixAPIListRequest.newInstance().filterOne("ID", id));
+        List<BitrixCRMDeal> deals = this.getDealsByRequest(BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("ID", id));
         if(deals != null && deals.size() > 0){
             return deals.get(0);
         }

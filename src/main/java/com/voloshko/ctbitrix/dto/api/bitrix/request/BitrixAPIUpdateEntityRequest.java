@@ -1,13 +1,14 @@
 package com.voloshko.ctbitrix.dto.api.bitrix.request;
 
 import com.voloshko.ctbitrix.dto.api.bitrix.entity.BitrixCRMEntity;
+import com.voloshko.ctbitrix.dto.api.bitrix.params.SimpleEntityField;
 
 /**
  * Created by berz on 18.03.2016.
  */
 public class BitrixAPIUpdateEntityRequest extends BitrixAPIFunctionRequest {
     private BitrixCRMEntity fields;
-    private String id;
+    private SimpleEntityField id;
 
     @Override
     public boolean correct() {
@@ -31,11 +32,11 @@ public class BitrixAPIUpdateEntityRequest extends BitrixAPIFunctionRequest {
         this.fields = fields;
     }
 
-    public String getId() {
+    public SimpleEntityField getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(SimpleEntityField id) {
         this.id = id;
     }
 }

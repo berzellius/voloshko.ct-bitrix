@@ -3,6 +3,7 @@ package com.voloshko.ctbitrix.dto.api.bitrix.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
 import lombok.Data;
 
 /**
@@ -14,31 +15,44 @@ public class BitrixCRMDeal extends BitrixCRMEntityCCLD {
     public BitrixCRMDeal() {
     }
 
+    @RequireByDefault
     @JsonProperty("ADDITIONAL_INFO")
     private String additional_info;
+    @RequireByDefault
     @JsonProperty("BEGINDATE")
     private String begindate;
+    @RequireByDefault
     @JsonProperty("CLOSED")
     private String closed;
+    @RequireByDefault
     @JsonProperty("CLOSEDATE")
     private String closedate;
+    @RequireByDefault
     @JsonProperty("COMMENTS")
     private String comments;
+    @RequireByDefault
     @JsonProperty("CONTACT_ID")
     private Long contact_id;
+    @RequireByDefault
     @JsonProperty("CURRENCY_ID")
     private String currency_id;
+    @RequireByDefault
     @JsonProperty("LEAD_ID")
     private Long lead_id;
+    @RequireByDefault
     @JsonProperty("PROBABILITY")
     private String probability;
+    @RequireByDefault
     @JsonProperty("STAGE_ID")
     private String stage_id;
+    @RequireByDefault
     @JsonProperty("TITLE")
     private String title;
+    @RequireByDefault
     @JsonProperty("TYPE_ID")
     private String type_id;
     /* Рекламный канал */
+    @RequireByDefault
     @JsonProperty("UF_CRM_1458500417")
     private String uf_crm_1458500417;
 
