@@ -35,4 +35,12 @@ public class BitrixRefreshAccessServiceImpl implements BitrixRefreshAccessServic
         bitrixRefreshAccessNew.setDtmCreate(new Date());
         bitrixRefreshAccessRepository.save(bitrixRefreshAccessNew);
     }
+
+    @Override
+    public void addTokens(String accessCode, String refreshCode) {
+        BitrixRefreshAccess bitrixRefreshAccess = new BitrixRefreshAccess();
+        bitrixRefreshAccess.setRefreshToken(refreshCode);
+        bitrixRefreshAccess.setAccessToken(accessCode);
+        this.newRefreshAccess(bitrixRefreshAccess);
+    }
 }

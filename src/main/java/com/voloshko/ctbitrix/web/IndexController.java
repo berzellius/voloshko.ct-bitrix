@@ -1,7 +1,5 @@
 package com.voloshko.ctbitrix.web;
 
-import com.voloshko.ctbitrix.dmodel.Call;
-import com.voloshko.ctbitrix.dto.api.bitrix.request.BitrixAPIRequest;
 import com.voloshko.ctbitrix.exception.APIAuthException;
 import com.voloshko.ctbitrix.repository.CallRepository;
 import com.voloshko.ctbitrix.service.BitrixAPIService;
@@ -11,7 +9,11 @@ import com.voloshko.ctbitrix.service.CtBitrixBusinessLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.text.ParseException;
 
@@ -73,5 +75,26 @@ public class IndexController extends BaseController {
 
         return "index";
     }
+
+    @RequestMapping(value="bitrix_update_initial")
+    public String updBitrixInit(
+            Model model,
+            @RequestParam("refresh")
+            String refresh_token,
+            @RequestParam("access")
+            String access_token,
+            @RequestParam("pass")
+            String pass
+    ){
+        try {
+            bitrixAPIService.updateInitialTokens(refresh_token, access_token, pass);
+            model.addAttribute("msg", "success");
+        }
+        catch(IllegalArgumentException e){
+            model.addAttribute("msg", e.getMessage());
+        }
+        return "upd";
+    }
+
 
 }

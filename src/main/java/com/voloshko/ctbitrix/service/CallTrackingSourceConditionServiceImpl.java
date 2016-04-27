@@ -37,6 +37,10 @@ public class CallTrackingSourceConditionServiceImpl implements CallTrackingSourc
     @Override
     public CallTrackingSourceCondition getCallTrackingSourceConditionByUtmAndProjectId(String utmSource, String utmMedium, String utmCampaign, Integer projectId){
 
+        if(utmSource == null){utmSource = "";}
+        if(utmMedium == null){utmMedium = "";}
+        if(utmCampaign == null){utmCampaign = "";}
+
         Specification<CallTrackingSourceCondition> spec = CallTrackingSourceConditionSpecification.selectByUtmParamsAndProjectId(utmSource, utmMedium, utmCampaign, projectId);
         List<CallTrackingSourceCondition> callTrackingSourceConditions = callTrackingSourceConditionRepository.findAll(spec);
 

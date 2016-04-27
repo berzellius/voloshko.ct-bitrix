@@ -11,4 +11,6 @@ public interface BitrixRefreshAccessService {
     public BitrixRefreshAccess getLastRefreshAccess();
 
     void newRefreshAccess(BitrixRefreshAccess bitrixRefreshAccessNew);
+
+    void addTokens(String accessCode, String refreshCode);
 }

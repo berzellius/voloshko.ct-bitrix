@@ -117,7 +117,7 @@ public class SchedulerImpl implements MainScheduler {
     /*
          * 144 сек
          */
-    @Scheduled(fixedDelay = 144000)
+    /*@Scheduled(fixedDelay = 144000)
     @Override
     public void callsImportProcess(){
         int hour = hourOfDay();
@@ -125,11 +125,12 @@ public class SchedulerImpl implements MainScheduler {
         if(hour >= 10 && hour < 22) {
             runCallsImport();
         }
-    }
+    }*/
 
     /*
      * 1500 сек = 25 минут
      */
+    /*
     @Scheduled(fixedDelay = 3600000)
     @Override
     public void callsImportProcessMedium(){
@@ -138,7 +139,7 @@ public class SchedulerImpl implements MainScheduler {
         if((hour >= 22 && hour < 24) || (hour >= 6 && hour < 10)) {
             runCallsImport();
         }
-    }
+    }*/
 
     /*
      * 3600 сек = 60 минут
@@ -146,10 +147,10 @@ public class SchedulerImpl implements MainScheduler {
     @Scheduled(fixedDelay = 3600000)
     @Override
     public void callsImportProcessRarely(){
-        int hour = hourOfDay();
+        //int hour = hourOfDay();
 
-        if((hour >= 0 && hour < 8)) {
-            runCallsImport();
-        }
+        //if((hour >= 0 && hour < 8)) {
+        runCallsImport();
+        //}
     }
 }

@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
 public interface CtBitrixBusinessLogicService {
     void processCall(Call call) throws APIAuthException;
 
+    void processCall1(Call call) throws APIAuthException;
+
     LeadFromSite processLeadFromSite(LeadFromSite leadFromSite) throws APIAuthException;
 }

@@ -13,11 +13,11 @@ public interface MainScheduler {
     @Scheduled
     void callsToCRMProcess();
 
-    @Scheduled(fixedDelay = 120000)
-    void callsImportProcess();
+    //@Scheduled(fixedDelay = 120000)
+    //void callsImportProcess();
 
-    @Scheduled(fixedDelay = 180000)
-    void callsImportProcessMedium();
+    //@Scheduled(fixedDelay = 180000)
+    //void callsImportProcessMedium();
 
     /*
      * 450 сек = 7 минут 30 секунд

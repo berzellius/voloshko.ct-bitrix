@@ -1,7 +1,6 @@
 package com.voloshko.ctbitrix.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.text.log.LoggerFactory;
 import com.voloshko.ctbitrix.dmodel.BitrixRefreshAccess;
 import com.voloshko.ctbitrix.dto.api.ErrorHandlers.APIRequestErrorException;
 import com.voloshko.ctbitrix.dto.api.bitrix.annotations.RequireByDefault;
@@ -16,6 +15,8 @@ import com.voloshko.ctbitrix.exception.APIAuthException;
 import com.voloshko.ctbitrix.utils.ClassUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -32,7 +33,6 @@ import org.springframework.web.client.RestTemplate;
 
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -40,10 +40,13 @@ import java.util.*;
  * Created by berz on 12.03.2016.
  */
 @Service
-@Transactional
+@PropertySource("classpath:bitrix.properties")
 public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements BitrixAPIService {
 
+    @Value("${bitrix.initial_refresh_key}")
     private String initialRefreshToken;
+    @Value("${bitrix.initial_refresh_key_upd_pass}")
+    private String updateTokenPass;
     private String clientId;
     private String clientSecret;
     private String redirectURI;
@@ -535,5 +538,25 @@ public class BitrixAPIServiceImpl extends APIServiceRequestsImpl implements Bitr
     @Override
     public void setFunctionsUrl(String functionsUrl) {
         this.functionsUrl = functionsUrl;
+    }
+
+    @Override
+    @Transactional
+    public void updateInitialTokens(String refreshCode, String accessCode, String pass) {
+        if(pass.equals(this.getUpdateTokenPass())){
+            this.setInitialRefreshToken(refreshCode);
+            bitrixRefreshAccessService.addTokens(accessCode, refreshCode);
+        }
+        else{
+            throw new IllegalArgumentException("wrong pass");
+        }
+    }
+
+    public String getUpdateTokenPass() {
+        return updateTokenPass;
+    }
+
+    public void setUpdateTokenPass(String updateTokenPass) {
+        this.updateTokenPass = updateTokenPass;
     }
 }

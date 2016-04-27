@@ -67,4 +67,6 @@ public interface BitrixAPIService {
     void setLoginUrl(String loginUrl);
 
     void setFunctionsUrl(String functionsUrl);
+
+    void updateInitialTokens(String refreshCode, String accessCode, String pass);
 }

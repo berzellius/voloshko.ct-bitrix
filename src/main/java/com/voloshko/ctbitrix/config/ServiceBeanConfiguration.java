@@ -75,9 +75,9 @@ public class ServiceBeanConfiguration {
     @Bean
     public ProjectSettings projectSettings(){
         // Локальный сервер
-        //return new LocalProjectSettings();
+        return new LocalProjectSettings();
         // Боевой сервер
-        return new RemoteProjectSettings();
+        //return new RemoteProjectSettings();
     }
 
     @Bean
@@ -126,7 +126,7 @@ public class ServiceBeanConfiguration {
     @Bean
     public BitrixAPIService bitrixAPIService(){
         BitrixAPIService bitrixAPIService = new BitrixAPIServiceImpl();
-        bitrixAPIService.setInitialRefreshToken("3ogprtzj5ohurwvq1690mmyx73i32w4n");
+        //bitrixAPIService.setInitialRefreshToken("3ogprtzj5ohurwvq1690mmyx73i32w4n");
         bitrixAPIService.setClientId("local.56df37285e4da7.92471890");
         bitrixAPIService.setClientSecret("6229e40ca74d812e4a8ada6ff19135ca");
         bitrixAPIService.setDefaultScope("crm");

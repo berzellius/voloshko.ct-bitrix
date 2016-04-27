@@ -17,8 +17,9 @@ import com.voloshko.ctbitrix.repository.LeadFromSiteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -50,17 +51,15 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
 
     @Override
     public void processCall(Call call) throws APIAuthException {
+
         if(call.getState().equals(Call.State.DONE)){
             throw new IllegalArgumentException("Call must not be in 'DONE' state!");
         }
 
+        String phone = phoneExec(call.getNumber());
+
         // Ищем сущности Bitrix CRM по телефону
-        BitrixAPIFindByCommunicationResponse.Result findByPhone =
-                bitrixAPIService.findByCommunication(
-                        BitrixAPIFindByCommunicationRequest.getInstance()
-                                .values(call.getNumber())
-                                .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
-                );
+        BitrixAPIFindByCommunicationResponse.Result findByPhone = communicationByPhone(phone);
 
         Long leadID = null;
         BitrixCRMContact crmContact = null;
@@ -114,7 +113,7 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                 .sourceID("84996537185")
                 .phones(
                         MultiValueEntityField.arrayList(
-                                MultiValueEntityField.newInstance(null, "WORK", call.getNumber(), null)
+                                MultiValueEntityField.newInstance(null, "WORK", "7" .concat(call.getNumber()), null)
                         )
                 );
 
@@ -174,6 +173,128 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
     }
 
     @Override
+    public void processCall1(Call call) throws APIAuthException {
+
+        try {
+            Thread.sleep(3000);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+
+
+        if(call.getState().equals(Call.State.DONE)){
+            throw new IllegalArgumentException("Call must not be in 'DONE' state!");
+        }
+
+        String phone = phoneExec(call.getNumber());
+
+
+        List<BitrixAPIFindByCommunicationResponse.Result> finds = new ArrayList<>();
+        // Ищем сущности Bitrix CRM по телефону
+        finds.add(bitrixAPIService.findByCommunication(
+                BitrixAPIFindByCommunicationRequest.getInstance()
+                        .values(phone)
+                        .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+        ));
+
+        finds.add(bitrixAPIService.findByCommunication(
+                BitrixAPIFindByCommunicationRequest.getInstance()
+                        .values("8".concat(phone))
+                        .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+        ));
+
+        finds.add(bitrixAPIService.findByCommunication(
+                BitrixAPIFindByCommunicationRequest.getInstance()
+                        .values("7".concat(phone))
+                        .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+        ));
+
+        finds.add(bitrixAPIService.findByCommunication(
+                BitrixAPIFindByCommunicationRequest.getInstance()
+                        .values("+7".concat(phone))
+                        .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+        ));
+
+        ArrayList<BitrixCRMDeal> deals = new ArrayList<>();
+
+        for(BitrixAPIFindByCommunicationResponse.Result find : finds){
+            if(find.getLead() != null) {
+                for (Long leadID : find.getLead()) {
+                    ArrayList<BitrixCRMDeal> dealsByLead = bitrixAPIService.getDealsByRequest(
+                            BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("LEAD_ID", leadID)
+                    );
+                    if (dealsByLead != null) {
+                        deals.addAll(dealsByLead);
+                    }
+                }
+            }
+
+            if(find.getContact() != null) {
+                for (Long contactID : find.getContact()) {
+                    ArrayList<BitrixCRMDeal> dealsByContacts = bitrixAPIService.getDealsByRequest(
+                            BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("CONTACT_ID", contactID)
+                    );
+                    if (dealsByContacts != null) {
+                        deals.addAll(dealsByContacts);
+                    }
+                }
+            }
+        }
+
+        this.marketingChannelToDeals(deals, call.getSource());
+
+        bitrixAPIService.flush();
+
+        call.setState(Call.State.DONE);
+        callRepository.save(call);
+    }
+
+    private BitrixAPIFindByCommunicationResponse.Result communicationByPhone(String phone) throws APIAuthException {
+        BitrixAPIFindByCommunicationResponse.Result res = findCommunicationByPhone(phone);
+        if(res != null){
+            return res;
+        }
+
+        BitrixAPIFindByCommunicationResponse.Result res1 = findCommunicationByPhone("7".concat(phone));
+        if(res1 != null){
+            return res1;
+        }
+
+        BitrixAPIFindByCommunicationResponse.Result res2 = findCommunicationByPhone("+7".concat(phone));
+        if(res2 != null){
+            return res2;
+        }
+
+        BitrixAPIFindByCommunicationResponse.Result res3 = findCommunicationByPhone("8".concat(phone));
+        if(res3 != null){
+            return res3;
+        }
+
+        return bitrixAPIService.findByCommunication(
+                BitrixAPIFindByCommunicationRequest.getInstance()
+                        .values(phone)
+                        .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+        );
+    }
+
+    private BitrixAPIFindByCommunicationResponse.Result findCommunicationByPhone(String phone) throws APIAuthException {
+        // Ищем сущности Bitrix CRM по телефону
+        BitrixAPIFindByCommunicationResponse.Result findByPhone =
+                bitrixAPIService.findByCommunication(
+                        BitrixAPIFindByCommunicationRequest.getInstance()
+                                .values(phone)
+                                .type(BitrixAPIFindByCommunicationRequest.Type.PHONE)
+                );
+
+        if(
+                (findByPhone.getContact() != null && findByPhone.getContact().size() > 0) ||
+                        (findByPhone.getLead() != null && findByPhone.getLead().size() > 0)
+                ){
+            return findByPhone;
+        }
+        else return null;
+    }
+
     public LeadFromSite processLeadFromSite(LeadFromSite leadFromSite) throws APIAuthException {
         log.info("start processing lead from site");
 
@@ -189,16 +310,7 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
             throw new IllegalArgumentException("leadFromSite.origin is empty!");
         }
 
-        if(
-                leadFromSite.getLead().getUtm_source() == null ||
-                        leadFromSite.getLead().getUtm_medium() == null ||
-                        leadFromSite.getLead().getUtm_campaign() == null
-                ){
-            log.error("failed to determine utm params!");
-            throw new IllegalArgumentException("utm: source, medium, campaign must not be null! (may be empty strings)");
-        }
-
-        String phone = (leadFromSite.getLead().getPhone() != null)? leadFromSite.getLead().getPhone() : null;
+        String phone = (leadFromSite.getLead().getPhone() != null)? phoneExec(leadFromSite.getLead().getPhone()) : null;
         String email = (leadFromSite.getLead().getEmail() != null)? leadFromSite.getLead().getEmail() : null;
 
         log.info("phone " + ((phone != null)? phone : " is null"));
@@ -221,7 +333,8 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
         String source = callTrackingSourceCondition.getSourceName();
         if(source == null){
             log.error("failed to determine callTrackingCondition!");
-            throw new IllegalStateException("Unable to detect source!");
+            //throw new IllegalStateException("Unable to detect source!");
+            source = "N/A";
         }
 
         ArrayList<Long> contacts = new ArrayList<>();
@@ -359,9 +472,15 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
         }
 
         if(leadFromSite.getLead().getReferer() != null){
-            bitrixCRMLead.webs(MultiValueEntityField.arrayList(MultiValueEntityField.newInstance(
-                    null, "WORK", leadFromSite.getLead().getReferer(), null
-            )));
+            UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromOriginHeader(leadFromSite.getLead().getReferer());
+            UriComponents uriComponents = uriComponentsBuilder.build().encode();
+            if(uriComponents != null && uriComponents.getHost() != null && uriComponents.getPath() != null) {
+                String site = uriComponents.getScheme().concat("://").concat(uriComponents.getHost()).concat(uriComponents.getPath());
+
+                bitrixCRMLead.webs(MultiValueEntityField.arrayList(MultiValueEntityField.newInstance(
+                        null, "WORK", site, "WEB"
+                )));
+            }
         }
 
         if(leadFromSite.getLead().getComment() != null){
@@ -415,6 +534,33 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
                 deal.setMarketingChannel(marketingChannel);
                 deal.setChanged(true);
             }
+        }
+    }
+
+    private String phoneExec(String phone){
+        log.info("parsing phone: ".concat(phone));
+
+        if(phone.matches("^[\\d]+$")){
+            if(phone.length() >= 11 &&
+                    (
+                            phone.charAt(0) == '7' ||
+                                    phone.charAt(0) == '8'
+                        )
+                    ){
+                return phone.substring(1);
+            }
+            return phone;
+        }
+        else{
+            String parsed = "";
+            for (Integer i = 0; i < phone.length(); i++){
+                String ch = String.valueOf(phone.charAt(i));
+                if(ch.matches("\\d")){
+                    parsed = parsed.concat(ch);
+                }
+            }
+
+            return phoneExec(parsed);
         }
     }
 }

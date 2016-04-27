@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authorizeRequests()
-                .antMatchers("/", "/index", "/update_conditions", "/rest/**").permitAll()
+                .antMatchers("/", "/index", "/update_conditions", "/bitrix_update_initial", "/rest/**").permitAll()
                 .anyRequest().authenticated()
         ;
 

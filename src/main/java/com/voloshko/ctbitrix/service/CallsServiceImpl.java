@@ -70,6 +70,7 @@ public class CallsServiceImpl implements CallsService {
         List<LeadFromSite> leadFromSiteList = new ArrayList<>();
         for(Lead lead : leads){
             LeadFromSite leadFromSite = new LeadFromSite();
+            leadFromSite.setDtmCreate(new Date());
             leadFromSite.setSite(site);
             leadFromSite.setLead(lead);
             leadFromSite.setState(LeadFromSite.State.NEW);

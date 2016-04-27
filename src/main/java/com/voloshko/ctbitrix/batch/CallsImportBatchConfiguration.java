@@ -28,6 +28,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +55,15 @@ public class CallsImportBatchConfiguration {
 
         // Внимание: один шаг чтения должен сопровождаться одним шагом записи в БД. иначе будут засасываться повторяющиеся данные.
         CallTrackingCallsReader reader = new CallTrackingCallsReader(new Date(), new Date(), 100, CallTrackingCallsReader.DateMode.UPDATE_EACH_READ);
+        /*Calendar calFrom = Calendar.getInstance();
+        calFrom.set(2016, Calendar.FEBRUARY, 1);
+        Date dtFrom = calFrom.getTime();
+
+        Calendar calTo = Calendar.getInstance();
+        calTo.set(2016, Calendar.APRIL, 10);
+        Date dtTo = calTo.getTime();*/
+
+        //CallTrackingCallsReader reader = new CallTrackingCallsReader(dtFrom, dtTo, 100, CallTrackingCallsReader.DateMode.NO_UPDATE);
         return reader;
     }
 
