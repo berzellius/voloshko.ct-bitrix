@@ -461,7 +461,7 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
 
         if (phone != null) {
             bitrixCRMLead.phones(MultiValueEntityField.arrayList(MultiValueEntityField.newInstance(
-                    null, "WORK", phone, null
+                    null, "WORK", "7".concat(phone), null
             )));
         }
 
