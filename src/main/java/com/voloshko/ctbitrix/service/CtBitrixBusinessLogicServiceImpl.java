@@ -433,6 +433,12 @@ public class CtBitrixBusinessLogicServiceImpl implements CtBitrixBusinessLogicSe
         for(Long leadID : leads){
             log.info("working with lead#" + leadID);
 
+            BitrixCRMLead lead = bitrixAPIService.getLeadByID(leadID);
+            if(lead.getMarketingChannel() == null || lead.getMarketingChannel().equals("")) {
+                log.info("Setting marketing channel to lead#".concat(leadID.toString()));
+                lead.setMarketingChannel(source);
+            }
+
             ArrayList<BitrixCRMDeal> crmDeals = bitrixAPIService.getDealsByRequest(
                     BitrixAPIListRequest.newInstance(BitrixCRMDeal.class).filterOne("LEAD_ID", leadID)
             );
