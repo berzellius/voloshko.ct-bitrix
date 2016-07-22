@@ -2,8 +2,8 @@ package com.voloshko.ctbitrix.repository;
 
 import com.voloshko.ctbitrix.dmodel.Site;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 /**
